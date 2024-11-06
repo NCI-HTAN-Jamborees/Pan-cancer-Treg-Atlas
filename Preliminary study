@@ -5,3 +5,5 @@ Workflow:
 - custom T-reg signature (gating strategies)
 2- HTAN data transfer
 - Google cloud to 7 bridges
+
+Suggested pipeline is to download scRNAseq data and annotate different subpopulations of T-cells using different approaches to further subtype Tregs.

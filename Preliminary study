@@ -1,0 +1,7 @@
+Workflow:
+1- compare data annotation from 3 different sources:
+- CZI cellxgene
+- cell typist
+- custom T-reg signature (gating strategies)
+2- HTAN data transfer
+- Google cloud to 7 bridges

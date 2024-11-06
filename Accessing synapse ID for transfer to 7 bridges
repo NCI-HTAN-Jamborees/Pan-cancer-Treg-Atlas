@@ -1,0 +1,8 @@
+# open htan website 
+# go to explore tab
+# filter by file type (hdf5) and by assay (scrnaseq)
+# press view button to sort by processing
+# select big query
+# open in google cloud
+# navigate to big query then to big query studio
+# open the file isb-cgc-bq > HTAN > id_provenance_current > preview to get synapse IDs

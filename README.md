@@ -27,7 +27,11 @@ Single-cell RNAseq data was recovered from HTAN as described above and processed
 
 **Downstream analysis**
 
-## Limitations?
+## Limitations
+- limited by level 4 data and one filetype
+- cell drop out issue
+- preprocessing one dataset at a time
+
 ## Conclusions and future directions
 In the future, we hope to automate the pipeline for CellTypist to analyze and annotate huge sets of databases at once for further downstream clustering and processing. We also hope to include more Treg data in the atlas we have created and for this atlas to become a continuously updated resource for investigators who are interested in the fields of Tregs and immunotherapy.
 

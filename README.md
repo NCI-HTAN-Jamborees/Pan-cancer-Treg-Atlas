@@ -5,13 +5,9 @@
 Regulatory Tcells (Tregs) are a subset of CD4+ Tcells that overexpress the master transcription factor forkhead box protein P3 (FOXP3) and constitute the main Tcell population with an immunosuppressive profile (ref). Tregs tend to suppress other immune cells in the context of cancer via several mechanisms of immune suppression (ref). Enriching for Tregs has allowed investigators to identify various subtypes of this population but these subpopulations seem to behave differently in humans vs. other animal models and across tissue types (ref). This has encouraged the development of a Treg atlas that encompasses the diverse molecular profiles that characterize Tregs, but this has been limited by the fact that most Treg studies typically rely on data generated from bulk RNA sequencing which cannot properly capture the subtleties of this cell type, nor can it recapitulate the spatial impact of different compartments on the function of Tregs (ref). Here, we leverage single cell databases from the Human Tumor Atlas Network (HTAN) to generate a Pan-Cancer-Treg Atlas encompassing the diverse profiles of Tregs across cancer types. This is done by annotating different cell types from the raw data to identify Tcells, followed by the selection of Tregs based on their expression of CD4 and FOXP3, and performing various clustering methods to highlight the diversity in molecular profile and function of the Tregs in different cancer types. The workflow and results are described below.
 ## Analysis goals
 - Selecting relevant single cell databases
-
 - Annotating cell types
-
 - Identifying Tregs in different cancer types
-
 - Clustering analysis
-
 - Deriving novel biological conclusions from generated atlas
 
 ## Pipeline and results

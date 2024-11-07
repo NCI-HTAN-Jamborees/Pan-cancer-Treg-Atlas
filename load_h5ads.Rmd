@@ -1,0 +1,115 @@
+---
+title: "Load and Merge"
+author: "DCI bioinformatics"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Prereqs
+
+Paths and libraries
+```{r}
+library(Seurat)
+library(tidyverse)
+library(gridExtra)
+
+#https://github.com/cellgeni/schard
+devtools::install_github("cellgeni/schard")
+
+library(schard)
+
+indir <- "/sbgenomics/project-files"
+outdir <- "/sbgenomics/output-files"
+
+
+```
+
+# Load h5ads
+
+```{r}
+tregfiles <- list.files(indir, pattern = "tregs.h5ad")
+fnames <- file.path(indir, tregfiles)
+fnames.base <- basename(fnames) %>%
+  gsub(".h5ad","",.)
+
+fnames
+
+obj.list <- fnames %>%
+  purrr::map(~schard::h5ad2seurat(.x))
+
+names(obj.list) <- fnames.base
+obj.list
+
+```
+
+# Standardize feature names
+
+```{r}
+# Are features gene symbols? - yes
+obj.list %>%
+  purrr::map(~Features(.x)[1:10])
+
+# There are multiple features that point to the same symbol, so 
+#  these counts must be aggregated
+feats <- rownames(obj.list[[1]])
+feats[str_detect(feats, "[.]")]
+
+#CTD-2192J16
+
+
+# function to aggregate counts from duplicate gene symbols
+aggregate_symbs <- function(obj1){
+  
+  # Extract the expression matrix from the RNA assay
+  rna_data <- obj1@assays$RNA@data
+  
+  # Remove suffixes like .1, .2 from feature names
+  newnames <- gsub("\\.[0-9]+$", "", rownames(rna_data))
+  #newnames[str_detect(newnames, "[.]")]
+  #newnames[grepl("CTD-2192J16",newnames)]
+  rownames(rna_data) <- newnames
+  
+  # Transpose the data to make features the columns and cells the rows
+  rna_data_t <- t(rna_data)
+  
+  # Create a data frame and aggregate the duplicate feature names (columns now)
+  aggregated_data <- as.data.frame(rna_data_t)
+  aggregated_data$Feature <- rownames(aggregated_data)
+  
+  # Aggregate by feature name, summing the expression values for duplicates
+  aggregated_data <- aggregate(. ~ Feature, data = aggregated_data, FUN = sum)
+  
+  ncol(aggregated_data) # features after aggregation
+  ncol(rna_data_t) # features before aggregation
+  
+  
+  # The result of aggregate will have the feature names in the first column, so set the row names
+  rownames(aggregated_data) <- aggregated_data$Feature
+  
+  # Remove the redundant 'Feature' column
+  aggregated_data <- aggregated_data[, -1]
+  # Reassign the aggregated data back into the Seurat object
+  obj1@assays$RNA@data <- t(aggregated_data)
+  
+  obj1.agg <- obj1
+  
+  return(obj1.agg)
+  
+}
+
+
+obj.list.agg <- obj.list %>%
+  purrr::map(~aggregate_symbs(.x))
+
+obj.list.agg
+genenames <- Features(obj.list.agg[[1]])
+genenames[str_detect(genenames, "[.]")]
+
+obj.list.agg %>%
+  purrr::map(~length(Features(.x)))
+
+```

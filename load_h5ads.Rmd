@@ -1,8 +1,9 @@
 ---
-title: "Load and Merge"
-author: "DCI bioinformatics"
-date: "`r Sys.Date()`"
+title: "Load h5ads"
 output: html_document
+date: "2024-11-07"
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -62,12 +63,16 @@ feats[str_detect(feats, "[.]")]
 
 
 # function to aggregate counts from duplicate gene symbols
+#obj1 <- obj.list[[1]]
 aggregate_symbs <- function(obj1){
   
   # Extract the expression matrix from the RNA assay
   rna_data <- obj1@assays$RNA@data
+  rownames(rna_data)[1:10] # features
+
   
   # Remove suffixes like .1, .2 from feature names
+  # Update the matrix rownames
   newnames <- gsub("\\.[0-9]+$", "", rownames(rna_data))
   #newnames[str_detect(newnames, "[.]")]
   #newnames[grepl("CTD-2192J16",newnames)]
@@ -78,38 +83,82 @@ aggregate_symbs <- function(obj1){
   
   # Create a data frame and aggregate the duplicate feature names (columns now)
   aggregated_data <- as.data.frame(rna_data_t)
-  aggregated_data$Feature <- rownames(aggregated_data)
+  aggregated_data$CellName <- rownames(aggregated_data)
   
   # Aggregate by feature name, summing the expression values for duplicates
-  aggregated_data <- aggregate(. ~ Feature, data = aggregated_data, FUN = sum)
+  aggregated_data <- aggregate(. ~ CellName, data = aggregated_data, FUN = sum)
   
   ncol(aggregated_data) # features after aggregation
   ncol(rna_data_t) # features before aggregation
   
-  
   # The result of aggregate will have the feature names in the first column, so set the row names
-  rownames(aggregated_data) <- aggregated_data$Feature
-  
-  # Remove the redundant 'Feature' column
+  rownames(aggregated_data) <- aggregated_data$CellName
+  # Remove the redundant 'CellName' column
   aggregated_data <- aggregated_data[, -1]
-  # Reassign the aggregated data back into the Seurat object
-  obj1@assays$RNA@data <- t(aggregated_data)
   
-  obj1.agg <- obj1
+  # Create a fresh Seurat object
+  # extract metadata
+  md <- obj1@meta.data %>%
+    rownames_to_column(var = "cellid") %>%
+    data.frame() 
+  rownames(md) <- md$cellid
+  # re-order cells in count matrix
+  aggregated_data.o <- aggregated_data[md$cellid,]
+  #rownames(aggregated_data.o)[1:10]
+  #rownames(md)[1:10]
+  
+  obj1.agg <- CreateSeuratObject(counts = t(aggregated_data.o), project = "SeuratProject", assay = "RNA",
+                     min.cells = 0, min.features = 0, names.field = 1,
+                     names.delim = "_", meta.data = md)
+  
   
   return(obj1.agg)
   
 }
 
 
-obj.list.agg <- obj.list %>%
-  purrr::map(~aggregate_symbs(.x))
+intermedf <- file.path(outdir, "obj-list-agg.RDS")
+if(!file.exists(intermedf)){
+  obj.list.agg <- obj.list %>%
+    purrr::map(~aggregate_symbs(.x))
+  saveRDS(obj.list.agg, file = file.path(outdir, "obj-list-agg.RDS"))
+}else{
+  obj.list.agg <- readRDS(intermedf)
+}
 
-obj.list.agg
-genenames <- Features(obj.list.agg[[1]])
-genenames[str_detect(genenames, "[.]")]
 
-obj.list.agg %>%
-  purrr::map(~length(Features(.x)))
+tab.agg <- obj.list.agg %>%
+  purrr::map(~length(Features(.x))) %>%
+  purrr::map_dfr(~data.frame(n.features = .x), .id = "fname.base") %>%
+  mutate(symbs.aggr = T)
+
+tab.orig <- obj.list %>%
+  purrr::map(~length(Features(.x))) %>%
+  purrr::map_dfr(~data.frame(n.features = .x), .id = "fname.base")%>%
+  mutate(symbs.aggr = F)
+
+tab.agg %>%
+  full_join(tab.orig) %>%
+  pivot_wider(id_cols = c(fname.base),
+              names_from = symbs.aggr,
+              values_from = n.features)
+
+```
+
+# Integrate Tregs
+
+```{r}
+obj1 <- obj.list.agg[[1]]
+obj2 <- obj.list.agg[[2]]
+
+obj1
+obj2
+
+merged_seurat <- merge(obj1, y = c(obj2))
+
+# 
+ifnb <- IntegrateLayers(object = ifnb, method = CCAIntegration, orig.reduction = "pca", new.reduction = "integrated.cca",
+    verbose = FALSE)
+
 
 ```

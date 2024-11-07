@@ -2,7 +2,7 @@
 #### Benjamin Green, Beata Malachowska, Marissa Lee, Abhirami Suresh, Archana Balan, Yichun He, Elie Abi Khalil
 ##### HTAN Data Jamboree Nov 6-8, 2024
 ## Background
-Regulatory Tcells (Tregs) are a subset of CD4+ Tcells that overexpress the master transcription factor forkhead box protein P3 (FOXP3) and constitute the main Tcell population with an immunosuppressive profile (ref). Tregs tend to suppress other immune cells in the context of cancer via several mechanisms of immune suppression (ref). Enriching for Tregs has allowed investigators to identify various subtypes of this population but these subpopulations seem to behave differently in humans vs. other animal models and across tissue types (ref). This has encouraged the development of a Treg atlas that encompasses the diverse molecular profiles that characterize Tregs, but this has been limited by the fact that most Treg studies typically rely on data generated from bulk RNA sequencing which cannot properly capture the subtleties of this cell type, nor can it recapitulate the spatial impact of different compartments on the function of Tregs (ref). Here, we describe the creation of a Pan-Cancer-Treg Atlas by leveraging single cell databases from the Human Tumor Atlas Network (HTAN). The workflow and results are described below.
+Regulatory Tcells (Tregs) are a subset of CD4+ Tcells that overexpress the master transcription factor forkhead box protein P3 (FOXP3) and constitute the main Tcell population with an immunosuppressive profile. Tregs tend to suppress other immune cells in the context of cancer via several mechanisms of immune suppression. Enriching for Tregs has allowed investigators to identify various subtypes of this population but these subpopulations seem to behave differently in humans vs. other animal models and across tissue types [(Togashi et. al, 2019)](https://www.nature.com/articles/s41571-019-0175-7). This has encouraged the development of a Treg atlas that encompasses the diverse molecular profiles that characterize Tregs, but this has been limited by the fact that most Treg studies typically rely on data generated from bulk RNA sequencing which cannot properly capture the subtleties of this cell type, nor can it recapitulate the spatial impact of different compartments on the function of Tregs (ref). Here, we describe the creation of a Pan-Cancer-Treg Atlas by leveraging single cell databases from the Human Tumor Atlas Network (HTAN). The workflow and results are described below.
 ## Analysis goals
 - Selecting relevant single cell databases
 - Annotating cell types
@@ -11,7 +11,8 @@ Regulatory Tcells (Tregs) are a subset of CD4+ Tcells that overexpress the maste
 - Deriving novel biological conclusions from generated atlas
 
 ## Pipeline and results
-(Diagram of workflow)
+Fig.1
+![Alt Text](workflow.png)
 
 **Data input**
 Single-cell HTAN level 4 data was accessed using synapseclient and downloaded to cbc.sbgenomics as described in the notebook download-synapse-data.sh to perform processing in a jupyter environment.

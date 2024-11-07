@@ -15,7 +15,7 @@ Fig.1
 ![Alt Text](workflow.png)
 
 **Data input**
-Single-cell HTAN level 4 data was accessed using synapseclient and downloaded to cbc.sbgenomics as described in the notebook download-synapse-data.sh to perform processing in a jupyter environment.
+Single-cell HTAN level 4 data was accessed using synapseclient and downloaded to cbc.sbgenomics as described in the notebook download-synapse-data.sh to perform processing in a jupyter environment. A list of the databases used could be found in 
 
 **Preprocessing, cell annotation, and clustering**
 Single-cell RNAseq data was recovered from HTAN as described above and processed using the pipeline elaborated in (link to processing pipeline). Briefly, the data was initially quality checked (fig.) prior to annotation with python-based, CellTypist, for automated cell typing according to references available mainly for human and mouse data. Then, the data is normalized and log transformed to account for 10,000 counts per cell which is used for the creation of UMAP and PCA plots. CellTypist then curates models and ontologies for the annotation of the cells within different clusters. We applied this pipeline on X number of databases and confirmed that the plots were consistent with the original processing (fig). We then selectively extracted the Tregs from the different datasets and fed them into the integration pipeline for further downstream processing and comparisons across samples and cancer subtypes.

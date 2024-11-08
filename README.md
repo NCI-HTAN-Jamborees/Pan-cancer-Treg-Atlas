@@ -32,7 +32,7 @@ Clustering of cells from the same dataset reveals various distinct subpopulation
 Majority voting can extract Tregs based on expression of CD4 and FOXP3.
 
 **3. Integration**
-After extracting the Tregs from our chosen datasets and exporting them as h5ad, the files were merged in Rstudio as described in the [integrate-h5ads.Rmd](integrate-h5ads.Rmd) notebook. Firstly, duplicate features were aggregated and metadata was added and merged in a seurat object. Then, we perfromed batch correction using CCA and Harmony integration. This allows us to visualize Treg populations from different datasets in UMAP format as shown in (Fig.3.)
+After extracting the Tregs from our chosen datasets and exporting them as h5ad, the files were merged and processed both in Rstudio and a python enviornment separately as described in the [integrate-h5ads.Rmd](integrate-h5ads.Rmd) and [harmony_integration.ipynb](harmony_integration.ipynb) notebooks. This allows the comparison of outputs from two different algorithms for a more thorough investigation of Tregs. In both approaches, duplicate features were aggregated and metadata was added and merged with the respective objects. Then, we perfromed batch correction using CCA and Harmony integration. This allows us to visualize Treg populations from different datasets in UMAP format as shown in (Fig.3.)
 
 **Fig.3.**
 ![Alt Text](integration.png)

@@ -14,10 +14,10 @@ Regulatory Tcells (Tregs) are a subset of CD4+ Tcells that overexpress the maste
 ![Alt Text](workflow.png)
 
 **1. Data input**
-Single-cell HTAN level 4 data was accessed using synapseclient and downloaded to cbc.sbgenomics as described in the notebook [download-synapse-data.sh](download-synpase-data.sh) to perform processing in a jupyter environment. A list of the databases used could be found in [excel](link)
+Single-cell HTAN level 4 data was accessed using synapseclient and downloaded to cbc.sbgenomics as described in the notebook [download-synapse-data.sh](download-synpase-data.sh) to perform processing in a jupyter environment. A list of the datasets used could be found in [htan_manifest.xlsx](htan_manifest.xlsx)
 
 **2. Preprocessing, cell annotation, and clustering**
-Single-cell RNAseq data was recovered from HTAN as described above and processed using the pipeline elaborated in the [scrna_extract_tregs.ipynb](scrna_extract_tregs.ipynb) notebook. Briefly, the data was initially quality checked (Fig.2a.) prior to annotation with python-based, CellTypist, for automated cell typing according to references available mainly for human and mouse data. Then, the data is normalized and log transformed to account for 10,000 counts per cell which is used for the creation of UMAP plots (Fig.2b.). CellTypist curates models and ontologies for the annotation of the cells within different clusters. We applied this pipeline on X number of databases and confirmed that the plots were consistent with the original processing. We then selectively extracted the Tregs (Fig.2c.) from the different datasets and fed them into the integration pipeline for further downstream processing and comparisons across samples and cancer subtypes.
+Single-cell RNAseq data was recovered from HTAN as described above and processed using the pipeline elaborated in the [scrna_extract_tregs.ipynb](scrna_extract_tregs.ipynb) notebook. Briefly, the data was initially quality checked (Fig.2a.) prior to annotation with python-based, CellTypist, for automated cell typing according to references available mainly for human and mouse data. Then, the data is normalized and log transformed to account for 10,000 counts per cell which is used for the creation of UMAP plots (Fig.2b.). CellTypist curates models and ontologies for the annotation of the cells within different clusters. We applied this pipeline on 20 datasets (of which, 7 included Tregs). and confirmed that the plots were consistent with the original processing. We then selectively extracted the Tregs (Fig.2c.) from the different datasets and fed them into the integration pipeline for further downstream processing and comparisons across samples and cancer subtypes.
 
 **Fig.2a.**
 ![Alt Text](qc.png)
@@ -25,7 +25,7 @@ The data shows that the authros have already filtered for cells with mito frac>2
 
 **Fig.2b.**
 ![Alt Text](umap.png)
-Clustering of cells from the same database reveals various distinct subpopulations of cell types, including Tregs.
+Clustering of cells from the same dataset reveals various distinct subpopulations of cell types, including Tregs.
 
 **Fig.2c.**
 ![Alt Text](filter_for_treg.png)
@@ -41,10 +41,10 @@ After extracting the Tregs from our chosen datasets and exporting them as h5ad, 
 Following the clustering of our extracted Tregs into distinct subtypes originating from different tumor tissues, the populations could be further segreated based on spiecifc gene expressions. This allows the creation of bubble plots summarizing the gene expression profiles of our extracted Treg populations. We can additionally link this to the metadata allowing us to reveal the frequency of certain profiles in responders vs. non responders for example. We can also conduct additional molecular analyses such as pathway analysis, Tcell receptor (TCR) repertoire profiling, and trajectory analysis.
 
 ## Conclusions and future directions
-We were successfully able to integrate single-cell Treg data from various datasets derived from HTAN and cluster the distinct populations based on gene expression. We reveal 17 different subclusters originating from several tumor types and resolve the molecular differences that characterize these clusters. This is the first step towards creating our comprehensive pan-cancer-Treg-Atlas describing the intricacies of Tregs in orchestrating the immunosupressive response in tumor models. In the future, we hope to automate the pipeline for CellTypist to analyze and annotate huge sets of databases at once for further downstream clustering and processing. We also hope to include more Treg data in the generated atlas by further analyzing different filetypes and data levels present in HTAN. We hope that this atlas becomes a continuously updated resource for investigators who are interested in the fields of Tregs and immunotherapeutic development.
+We were successfully able to integrate single-cell Treg data from various datasets derived from HTAN and cluster the distinct populations based on gene expression. We reveal 17 different subclusters originating from several tumor types and resolve the molecular differences that characterize these clusters. This is the first step towards creating our comprehensive pan-cancer-Treg-Atlas describing the intricacies of Tregs in orchestrating the immunosupressive response in tumor models. In the future, we hope to automate the pipeline for CellTypist to analyze and annotate huge sets of data at once for further downstream clustering and processing. We also hope to include more Treg data in the generated atlas by further analyzing different filetypes and data levels present in HTAN. We hope that this atlas becomes a continuously updated resource for investigators who are interested in the fields of Tregs and immunotherapeutic development.
 
 ## Limitations
-- Here, we were limited by the use of level 4 HTAN data due to time constraints, ultimately limiting the number of databases we could use for analysis.
+- Here, we were limited by the use of level 4 HTAN data due to time constraints, ultimately limiting the number of datasets we could use for analysis.
 - Filtering the data during the Treg extraction step initially resulted in a cell drop out issue due to some cells not expressing CD4 or FOXP3, but this was addressed with the inclusion of a majority voting step to classify a Treg based on the expression of other markers that properly clustered with the true Treg population.
 - We were finally limited by only being able to apply our pipeline on one dataset at a time which resulted in the analysis requiring more time than initially expected.
 

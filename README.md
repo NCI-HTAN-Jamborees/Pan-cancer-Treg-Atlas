@@ -39,14 +39,15 @@ After extracting the Tregs from our chosen datasets and exporting them as h5ad, 
 ![Alt Text](umap)
 
 **4. Downstream analysis**
+Following the clustering of our extracted Tregs into distinct subtypes originating from different tumor tissues, the populations could be further segreated based on spiecifc gene expressions. This allows the creation of bubble plots summarizing the gene expression profiles of our extracted Treg populations. We can additionally link this to the metadata allowing us to reveal the frequency of certain profiles in responders vs. non responders for example. We can also conduct additional molecular analyses such as pathway analysis, Tcell receptor (TCR) repertoire profiling, and trajectory analysis.
+
+## Conclusions and future directions
+In the future, we hope to automate the pipeline for CellTypist to analyze and annotate huge sets of databases at once for further downstream clustering and processing. We also hope to include more Treg data in the atlas we have created and for this atlas to become a continuously updated resource for investigators who are interested in the fields of Tregs and immunotherapy.
 
 ## Limitations
 - Here, we were limited by the use of level 4 HTAN data due to time constraints, ultimately limiting the number of databases we could use for analysis.
 - Filtering the data during the Treg extraction step initially resulted in a cell drop out issue due to some cells not expressing CD4 or FOXP3, but this was addressed with the inclusion of a majority voting step to classify a Treg based on the expression of other markers that properly clustered with the true Treg population.
 - We were finally limited by only being able to apply our pipeline on one dataset at a time which resulted in the analysis requiring more time than initially expected.
-
-## Conclusions and future directions
-In the future, we hope to automate the pipeline for CellTypist to analyze and annotate huge sets of databases at once for further downstream clustering and processing. We also hope to include more Treg data in the atlas we have created and for this atlas to become a continuously updated resource for investigators who are interested in the fields of Tregs and immunotherapy.
 
 
 

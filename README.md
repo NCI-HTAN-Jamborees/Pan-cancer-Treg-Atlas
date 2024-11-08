@@ -54,6 +54,6 @@ In the future, we hope to automate the pipeline for CellTypist to analyze and an
 - Marissa Lee, affilitation
 - Archana Balan, affilitation
 - Yichun He, affilitation
-- Abhirami Suresh, affilitaion
+- Abhirami Suresh, Case Western Reserve University, Ohio
 - Elie Abi Khalil, University of Illinois Chicago
 

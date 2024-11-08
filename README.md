@@ -52,7 +52,7 @@ In the future, we hope to automate the pipeline for CellTypist to analyze and an
 - Team lead: Benjamin Green, University of Hawaii
 - Beata Malachowska, Albert Einstein College of Medicine
 - Marissa Lee, affilitation
-- Archana Balan, affilitation
+- Archana Balan, Johns Hopkins University
 - Yichun He, affilitation
 - Abhirami Suresh, Case Western Reserve University
 - Elie Abi Khalil, University of Illinois Chicago

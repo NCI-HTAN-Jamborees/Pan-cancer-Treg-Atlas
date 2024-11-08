@@ -35,7 +35,8 @@ Majority voting can extract Tregs based on expression of CD4 and FOXP3.
 After extracting the Tregs from our chosen datasets and exporting them as h5ad, the files were merged in Rstudio as described in the [integrate-h5ads.Rmd](integrate-h5ads.Rmd) notebook. Firstly, duplicate features were aggregated and metadata was added and merged in a seurat object. Then, we perfromed batch correction using CCA and Harmony integration. This allows us to visualize Treg populations from different datasets in UMAP format as shown in (Fig.3.)
 
 **Fig.3.**
-![Alt Text](umap)
+![Alt Text](integration.png)
+UMAP showing clustering of Tregs from different tumor types.
 
 **4. Downstream analysis**
 Following the clustering of our extracted Tregs into distinct subtypes originating from different tumor tissues, the populations could be further segreated based on spiecifc gene expressions. This allows the creation of bubble plots summarizing the gene expression profiles of our extracted Treg populations. We can additionally link this to the metadata allowing us to reveal the frequency of certain profiles in responders vs. non responders for example. We can also conduct additional molecular analyses such as pathway analysis, Tcell receptor (TCR) repertoire profiling, and trajectory analysis.

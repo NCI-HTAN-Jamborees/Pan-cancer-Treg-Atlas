@@ -118,7 +118,7 @@ aggregate_symbs <- function(obj1){
 }
 
 intermedb <- "obj-list-agg.RDS"
-if(!file.exists(file.path(indir, intermed))){
+if(!file.exists(file.path(indir, intermedb))){
   
   obj.list.agg <- obj.list %>%
     purrr::map(~aggregate_symbs(.x))
@@ -286,6 +286,9 @@ DimPlot(
   group.by = c("sourcefile"),
   combine = FALSE, label.size = 2
 )
+ggsave(filename = file.path("umap-harmony-files-res03.png"),
+       width = 12,
+       height = 8)
 
 DimPlot(
   obj.hint,
@@ -293,6 +296,10 @@ DimPlot(
   group.by = c("harmony_clusters"),
   combine = FALSE, label.size = 2
 )
+ggsave(filename = file.path("umap-harmony-clusters-res03.png"),
+       width = 12,
+       height = 8)
+
 
 ```
 
@@ -317,6 +324,9 @@ h.markers %>%
 write.csv(top10, file.path(outdir, "top10_harmony_res03.csv"))
 
 DoHeatmap(obj.hint, features = top10$gene) + NoLegend()
+ggsave(filename = file.path("heatmap-harmony-clusters-res03.png"),
+       width = 12,
+       height = 8)
 
 ```
 
@@ -329,19 +339,17 @@ DotPlot(object = obj.hint.j, features = activation.genes) +
   coord_flip() +
   ggtitle("Activation")
 # The following requested variables were not found: MEOX
+ggsave(filename = file.path("activation-harmony-clusters-res03.png"),
+       width = 12,
+       height = 8)
 
 integrin.genes <- markertab$Integrin
 DotPlot(object = obj.hint.j, features = integrin.genes) +
   coord_flip() +
   ggtitle("Integrin")
 # The following requested variables were not found: FAK
+ggsave(filename = file.path("integrin-harmony-clusters-res03.png"),
+       width = 12,
+       height = 8)
 
 ```
-
-
-
-
-
-
-
-

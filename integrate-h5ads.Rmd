@@ -19,7 +19,7 @@ library(tidyverse)
 library(gridExtra)
 
 #https://github.com/cellgeni/schard
-devtools::install_github("cellgeni/schard")
+#devtools::install_github("cellgeni/schard")
 
 library(schard)
 
@@ -32,7 +32,8 @@ outdir <- "/sbgenomics/output-files"
 # Load h5ads
 
 ```{r}
-tregfiles <- list.files(indir, pattern = "tregs.h5ad")
+tregfiles <- list.files(indir, pattern = "tregs_v2.h5ad")
+tregfiles
 fnames <- file.path(indir, tregfiles)
 fnames.base <- basename(fnames) %>%
   gsub(".h5ad","",.)
@@ -56,11 +57,8 @@ obj.list %>%
 
 # There are multiple features that point to the same symbol, so 
 #  these counts must be aggregated
-feats <- rownames(obj.list[[1]])
-feats[str_detect(feats, "[.]")]
-
-#CTD-2192J16
-
+#feats <- rownames(obj.list[[1]])
+#feats[str_detect(feats, "[.]")]
 
 # function to aggregate counts from duplicate gene symbols
 #obj1 <- obj.list[[1]]
@@ -117,7 +115,7 @@ aggregate_symbs <- function(obj1){
 }
 
 
-intermedf <- file.path(outdir, "obj-list-agg.RDS")
+intermedf <- file.path(indir, "obj-list-agg.RDS")
 if(!file.exists(intermedf)){
   obj.list.agg <- obj.list %>%
     purrr::map(~aggregate_symbs(.x))
@@ -145,20 +143,106 @@ tab.agg %>%
 
 ```
 
-# Integrate Tregs
+# Merge Tregs into 1 object
 
 ```{r}
-obj1 <- obj.list.agg[[1]]
-obj2 <- obj.list.agg[[2]]
+# add name of each h5ad source file to metadata
+for(i in 1:length(obj.list.agg)){
+  obj.list.agg[[i]]$sourcefile <- names(obj.list.agg)[i]
+}
 
-obj1
-obj2
+# merge into 1 seurat object
+merged_seurat <- merge(obj.list.agg[[1]], y = c(obj.list.agg[[2]],
+                                                obj.list.agg[[3]],
+                                                obj.list.agg[[4]],
+                                                obj.list.agg[[5]]))
 
-merged_seurat <- merge(obj1, y = c(obj2))
+# summarize the number of cells from each sourcefile
+merged_seurat@meta.data %>%
+  group_by(sourcefile) %>%
+  summarize(n = n())
 
-# 
-ifnb <- IntegrateLayers(object = ifnb, method = CCAIntegration, orig.reduction = "pca", new.reduction = "integrated.cca",
-    verbose = FALSE)
+# Make sure each sourcefile is a Layer...
+#merged_seurat[["RNA"]] <- split(merged_seurat[["RNA"]], f = merged_seurat$sourcefile)
+# Error in `split()`:
+#! The following layers are already split: ‘counts.1’, ‘counts.2’, ‘counts.3’, ‘counts.4’, ‘counts.5’ Please
+#• join before splitting
+Layers(merged_seurat)
+obj <- merged_seurat
+
+obj <- NormalizeData(obj)
+obj <- FindVariableFeatures(obj)
+obj <- ScaleData(obj)
+obj <- RunPCA(obj)
+
+```
+
+# Integrate with CCAIntegration
+```{r}
+
+# Integrate layers
+obj.int <- IntegrateLayers(
+  object = obj, method = CCAIntegration,
+  orig.reduction = "pca", new.reduction = "integrated.cca",
+  verbose = FALSE,
+  k.weight = 20
+)
+# Error: k.weight (100) is set larger than the number of cells in the smallest object (35). Please choose a smaller k.weight.
+# --> reduced to 20
+# Warning in irlba(A = mat3, nv = num.cc) : You're computing too large a percentage of total singular values, use a standard svd instead.
+
+obj.int <- FindNeighbors(obj.int, reduction = "integrated.cca", dims = 1:30)
+obj.int <- FindClusters(obj.int, resolution = 2, cluster.name = "cca_clusters")
+obj.int <- RunUMAP(obj.int, reduction = "integrated.cca", dims = 1:30, reduction.name = "umap.cca")
+
+DimPlot(
+  obj.int,
+  reduction = "umap.cca",
+  group.by = c("sourcefile"),
+  combine = FALSE, label.size = 2
+)
+
+DimPlot(
+  obj.int,
+  reduction = "umap.cca",
+  group.by = c("cca_clusters"),
+  combine = FALSE, label.size = 2
+)
 
 
 ```
+
+# Integrate with Harmony
+```{r}
+
+# Integrate layers
+obj.hint <- IntegrateLayers(
+  object = obj, method = HarmonyIntegration,
+  orig.reduction = "pca", new.reduction = "harmony",
+  verbose = FALSE
+)
+# initialized install of "harmony"
+obj.hint
+
+obj.hint <- FindNeighbors(obj.hint, reduction = "harmony", dims = 1:30)
+obj.hint <- FindClusters(obj.hint, resolution = 2, cluster.name = "harmony_clusters")
+obj.hint <- RunUMAP(obj.hint, reduction = "harmony", dims = 1:30, reduction.name = "umap.harmony")
+
+DimPlot(
+  obj.hint,
+  reduction = "umap.harmony",
+  group.by = c("sourcefile"),
+  combine = FALSE, label.size = 2
+)
+
+DimPlot(
+  obj.hint,
+  reduction = "umap.harmony",
+  group.by = c("harmony_clusters"),
+  combine = FALSE, label.size = 2
+)
+
+```
+
+
+

@@ -51,9 +51,9 @@ We were successfully able to integrate single-cell Treg data from various datase
 ## Team
 - Team lead: Benjamin Green, University of Hawaii
 - Beata Malachowska, Albert Einstein College of Medicine
-- Marissa Lee, affilitation
+- Marissa Lee, Duke University
 - Archana Balan, Johns Hopkins University
-- Yichun He, affilitation
+- Yichun He, Harvard SEAS & Broad Institute
 - Abhirami Suresh, Case Western Reserve University
 - Elie Abi Khalil, University of Illinois Chicago
 

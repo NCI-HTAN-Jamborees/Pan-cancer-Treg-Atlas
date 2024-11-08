@@ -23,6 +23,10 @@ library(gridExtra)
 
 library(schard)
 
+#install.packages('devtools')
+#devtools::install_github('immunogenomics/presto')
+library(presto)
+
 indir <- "/sbgenomics/project-files"
 outdir <- "/sbgenomics/output-files"
 
@@ -118,7 +122,7 @@ if(!file.exists(file.path(indir, intermed))){
   
   obj.list.agg <- obj.list %>%
     purrr::map(~aggregate_symbs(.x))
-  # started 10:07, ended ...
+  # started 11:01, ended ...11:31
   saveRDS(obj.list.agg, file = file.path(outdir, intermedb))
   
 }else{
@@ -158,7 +162,9 @@ if(!file.exists(file.path(indir, intermedb))){
   merged_seurat <- merge(obj.list.agg[[1]], y = c(obj.list.agg[[2]],
                                                   obj.list.agg[[3]],
                                                   obj.list.agg[[4]],
-                                                  obj.list.agg[[5]]))
+                                                  obj.list.agg[[5]],
+                                                  obj.list.agg[[6]],
+                                                  obj.list.agg[[7]]))
   
   # summarize the number of cells from each sourcefile
   merged_seurat@meta.data %>%
@@ -176,14 +182,17 @@ if(!file.exists(file.path(indir, intermedb))){
   
   # generate un-integrated umap
   obj <- FindNeighbors(obj, dims = 1:30, reduction = "pca")
-  obj <- FindClusters(obj, resolution = 2, cluster.name = "unintegrated_clusters")
+  obj <- FindClusters(obj, resolution = 0.2, cluster.name = "unintegrated_clusters")
   obj <- RunUMAP(obj, dims = 1:30, reduction = "pca", reduction.name = "umap.unintegrated")
   
+  intermedb
   saveRDS(obj, file = file.path(outdir, intermedb))
   
 }else{
   obj <- readRDS(file.path(indir, intermedb))
 }
+
+#dir(outdir)
 
 DimPlot(
   obj,
@@ -193,7 +202,7 @@ DimPlot(
 )
 
 DimPlot(
-  obj.int,
+  obj,
   reduction = "umap.unintegrated",
   group.by = c("unintegrated_clusters"),
   label.size = 2
@@ -218,9 +227,10 @@ if(!file.exists(file.path(indir, intermedb))){
   # Warning in irlba(A = mat3, nv = num.cc) : You're computing too large a percentage of total singular values, use a standard svd instead.
   
   obj.int <- FindNeighbors(obj.int, reduction = "integrated.cca", dims = 1:30)
-  obj.int <- FindClusters(obj.int, resolution = 2, cluster.name = "cca_clusters")
+  obj.int <- FindClusters(obj.int, resolution = 0.2, cluster.name = "cca_clusters")
   obj.int <- RunUMAP(obj.int, reduction = "integrated.cca", dims = 1:30, reduction.name = "umap.cca")
   
+  intermedb
   saveRDS(obj.int, file = file.path(outdir, intermedb))
   
 }else{
@@ -244,7 +254,7 @@ DimPlot(
 
 ```
 
-# Integrate with Harmony
+# Integrate with Harmony -- updated to res 0.3!
 ```{r}
 intermedb <- "obj-hint.RDS"
 if(!file.exists(file.path(indir, intermedb))){
@@ -259,9 +269,10 @@ if(!file.exists(file.path(indir, intermedb))){
   obj.hint
   
   obj.hint <- FindNeighbors(obj.hint, reduction = "harmony", dims = 1:30)
-  obj.hint <- FindClusters(obj.hint, resolution = 2, cluster.name = "harmony_clusters")
+  obj.hint <- FindClusters(obj.hint, resolution = 0.3, cluster.name = "harmony_clusters")
   obj.hint <- RunUMAP(obj.hint, reduction = "harmony", dims = 1:30, reduction.name = "umap.harmony")
   
+  intermedb
   saveRDS(obj.hint, file = file.path(outdir, intermedb))
   
 }else{
@@ -284,6 +295,52 @@ DimPlot(
 )
 
 ```
+
+# Find markers (Harmony integration) using res 0.3
+
+```{r}
+obj.hint.j <- JoinLayers(obj.hint)
+h.markers <- FindAllMarkers(obj.hint.j, assay = "RNA", only.pos = T)
+
+#h.markers %>%
+#    group_by(harmony_clusters) %>%
+#    dplyr::filter(avg_log2FC > 1)
+
+#VlnPlot(obj.hint, features = c("CD4", "FOXP3"))
+
+h.markers %>%
+    group_by(cluster) %>%
+    dplyr::filter(avg_log2FC > 1) %>%
+    slice_head(n = 10) %>%
+    ungroup() -> top10
+
+write.csv(top10, file.path(outdir, "top10_harmony_res03.csv"))
+
+DoHeatmap(obj.hint, features = top10$gene) + NoLegend()
+
+```
+
+Investigate marker genes
+```{r}
+markertab <- readxl::read_xlsx(file.path("Other_markers.xlsx"))
+
+activation.genes <- markertab$Activation
+DotPlot(object = obj.hint.j, features = activation.genes) +
+  coord_flip() +
+  ggtitle("Activation")
+# The following requested variables were not found: MEOX
+
+integrin.genes <- markertab$Integrin
+DotPlot(object = obj.hint.j, features = integrin.genes) +
+  coord_flip() +
+  ggtitle("Integrin")
+# The following requested variables were not found: FAK
+
+```
+
+
+
+
 
 
 

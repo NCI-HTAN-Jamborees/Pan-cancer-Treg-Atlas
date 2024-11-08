@@ -1,5 +1,4 @@
 # Pan-cancer-Treg-Atlas
-#### Benjamin Green, Beata Malachowska, Marissa Lee, Abhirami Suresh, Archana Balan, Yichun He, Elie Abi Khalil
 ##### HTAN Data Jamboree Nov 6-8, 2024
 ## Background
 Regulatory Tcells (Tregs) are a subset of CD4+ Tcells that overexpress the master transcription factor forkhead box protein P3 (FOXP3) and constitute the main Tcell population with an immunosuppressive profile. Tregs tend to suppress other immune cells in the context of cancer via several mechanisms of immune suppression. Enriching for Tregs has allowed investigators to identify various subtypes of this population but these subpopulations seem to behave differently in humans vs. other animal models and across tissue types [(Togashi et. al, 2019)](https://www.nature.com/articles/s41571-019-0175-7). This has encouraged the development of a Treg atlas that encompasses the diverse molecular profiles that characterize Tregs, but this has been limited by the fact that most Treg studies typically rely on data generated from bulk RNA sequencing which cannot properly capture the subtleties of this cell type. Here, we describe the creation of a Pan-Cancer-Treg Atlas by leveraging single cell databases from the Human Tumor Atlas Network (HTAN). The workflow (Fig.1.) and results are described below.
@@ -49,5 +48,18 @@ In the future, we hope to automate the pipeline for CellTypist to analyze and an
 - Filtering the data during the Treg extraction step initially resulted in a cell drop out issue due to some cells not expressing CD4 or FOXP3, but this was addressed with the inclusion of a majority voting step to classify a Treg based on the expression of other markers that properly clustered with the true Treg population.
 - We were finally limited by only being able to apply our pipeline on one dataset at a time which resulted in the analysis requiring more time than initially expected.
 
+## Team
+Team lead: Benjamin Green, University of Hawaii
 
+Beata Malachowska, affilitaion
+
+Marissa Lee, affilitation
+
+Archana Balan, affilitation
+
+Yichun He, affilitation
+
+Abhirami Suresh, affilitaion
+
+Elie Abi Khalil, University of Illinois Chicago
 

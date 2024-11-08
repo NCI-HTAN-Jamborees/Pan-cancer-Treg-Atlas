@@ -1,5 +1,5 @@
 ---
-title: "Load h5ads"
+title: "Load integrate h5ads"
 output: html_document
 date: "2024-11-07"
 editor_options: 
@@ -33,7 +33,6 @@ outdir <- "/sbgenomics/output-files"
 
 ```{r}
 tregfiles <- list.files(indir, pattern = "tregs_v2.h5ad")
-tregfiles
 fnames <- file.path(indir, tregfiles)
 fnames.base <- basename(fnames) %>%
   gsub(".h5ad","",.)
@@ -51,7 +50,7 @@ obj.list
 # Standardize feature names
 
 ```{r}
-# Are features gene symbols? - yes
+# Check that all features are gene symbols
 obj.list %>%
   purrr::map(~Features(.x)[1:10])
 
@@ -114,16 +113,17 @@ aggregate_symbs <- function(obj1){
   
 }
 
-
-intermedf <- file.path(indir, "obj-list-agg.RDS")
-if(!file.exists(intermedf)){
+intermedb <- "obj-list-agg.RDS"
+if(!file.exists(file.path(indir, intermed))){
+  
   obj.list.agg <- obj.list %>%
     purrr::map(~aggregate_symbs(.x))
-  saveRDS(obj.list.agg, file = file.path(outdir, "obj-list-agg.RDS"))
+  # started 10:07, ended ...
+  saveRDS(obj.list.agg, file = file.path(outdir, intermedb))
+  
 }else{
-  obj.list.agg <- readRDS(intermedf)
+  obj.list.agg <- readRDS(file.path(indir, intermedb))
 }
-
 
 tab.agg <- obj.list.agg %>%
   purrr::map(~length(Features(.x))) %>%
@@ -146,67 +146,99 @@ tab.agg %>%
 # Merge Tregs into 1 object
 
 ```{r}
-# add name of each h5ad source file to metadata
-for(i in 1:length(obj.list.agg)){
-  obj.list.agg[[i]]$sourcefile <- names(obj.list.agg)[i]
+intermedb <- "obj.RDS"
+if(!file.exists(file.path(indir, intermedb))){
+  
+  # add name of each h5ad source file to metadata
+  for(i in 1:length(obj.list.agg)){
+    obj.list.agg[[i]]$sourcefile <- names(obj.list.agg)[i]
+  }
+  
+  # merge into 1 seurat object
+  merged_seurat <- merge(obj.list.agg[[1]], y = c(obj.list.agg[[2]],
+                                                  obj.list.agg[[3]],
+                                                  obj.list.agg[[4]],
+                                                  obj.list.agg[[5]]))
+  
+  # summarize the number of cells from each sourcefile
+  merged_seurat@meta.data %>%
+    group_by(sourcefile) %>%
+    summarize(n = n())
+  
+  # Make sure each sourcefile is a Layer
+  #Layers(merged_seurat)
+  
+  obj <- merged_seurat
+  obj <- NormalizeData(obj)
+  obj <- FindVariableFeatures(obj)
+  obj <- ScaleData(obj)
+  obj <- RunPCA(obj)
+  
+  # generate un-integrated umap
+  obj <- FindNeighbors(obj, dims = 1:30, reduction = "pca")
+  obj <- FindClusters(obj, resolution = 2, cluster.name = "unintegrated_clusters")
+  obj <- RunUMAP(obj, dims = 1:30, reduction = "pca", reduction.name = "umap.unintegrated")
+  
+  saveRDS(obj, file = file.path(outdir, intermedb))
+  
+}else{
+  obj <- readRDS(file.path(indir, intermedb))
 }
 
-# merge into 1 seurat object
-merged_seurat <- merge(obj.list.agg[[1]], y = c(obj.list.agg[[2]],
-                                                obj.list.agg[[3]],
-                                                obj.list.agg[[4]],
-                                                obj.list.agg[[5]]))
+DimPlot(
+  obj,
+  reduction = "umap.unintegrated",
+  group.by = c("sourcefile"), 
+  label.size = 2
+)
 
-# summarize the number of cells from each sourcefile
-merged_seurat@meta.data %>%
-  group_by(sourcefile) %>%
-  summarize(n = n())
-
-# Make sure each sourcefile is a Layer...
-#merged_seurat[["RNA"]] <- split(merged_seurat[["RNA"]], f = merged_seurat$sourcefile)
-# Error in `split()`:
-#! The following layers are already split: ‘counts.1’, ‘counts.2’, ‘counts.3’, ‘counts.4’, ‘counts.5’ Please
-#• join before splitting
-Layers(merged_seurat)
-obj <- merged_seurat
-
-obj <- NormalizeData(obj)
-obj <- FindVariableFeatures(obj)
-obj <- ScaleData(obj)
-obj <- RunPCA(obj)
+DimPlot(
+  obj.int,
+  reduction = "umap.unintegrated",
+  group.by = c("unintegrated_clusters"),
+  label.size = 2
+)
 
 ```
 
 # Integrate with CCAIntegration
 ```{r}
-
-# Integrate layers
-obj.int <- IntegrateLayers(
-  object = obj, method = CCAIntegration,
-  orig.reduction = "pca", new.reduction = "integrated.cca",
-  verbose = FALSE,
-  k.weight = 20
-)
-# Error: k.weight (100) is set larger than the number of cells in the smallest object (35). Please choose a smaller k.weight.
-# --> reduced to 20
-# Warning in irlba(A = mat3, nv = num.cc) : You're computing too large a percentage of total singular values, use a standard svd instead.
-
-obj.int <- FindNeighbors(obj.int, reduction = "integrated.cca", dims = 1:30)
-obj.int <- FindClusters(obj.int, resolution = 2, cluster.name = "cca_clusters")
-obj.int <- RunUMAP(obj.int, reduction = "integrated.cca", dims = 1:30, reduction.name = "umap.cca")
+intermedb <- "obj-int.RDS"
+if(!file.exists(file.path(indir, intermedb))){
+  
+  # Integrate layers
+  obj.int <- IntegrateLayers(
+    object = obj, method = CCAIntegration,
+    orig.reduction = "pca", new.reduction = "integrated.cca",
+    verbose = FALSE,
+    k.weight = 20
+  )
+  # Error: k.weight (100) is set larger than the number of cells in the smallest object (35). Please choose a smaller k.weight.
+  # --> reduced to 20
+  # Warning in irlba(A = mat3, nv = num.cc) : You're computing too large a percentage of total singular values, use a standard svd instead.
+  
+  obj.int <- FindNeighbors(obj.int, reduction = "integrated.cca", dims = 1:30)
+  obj.int <- FindClusters(obj.int, resolution = 2, cluster.name = "cca_clusters")
+  obj.int <- RunUMAP(obj.int, reduction = "integrated.cca", dims = 1:30, reduction.name = "umap.cca")
+  
+  saveRDS(obj.int, file = file.path(outdir, intermedb))
+  
+}else{
+  obj.int <- readRDS(file.path(indir, intermedb))
+}
 
 DimPlot(
   obj.int,
   reduction = "umap.cca",
-  group.by = c("sourcefile"),
-  combine = FALSE, label.size = 2
+  group.by = c("sourcefile"), 
+  label.size = 2
 )
 
 DimPlot(
   obj.int,
   reduction = "umap.cca",
   group.by = c("cca_clusters"),
-  combine = FALSE, label.size = 2
+  label.size = 2
 )
 
 
@@ -214,19 +246,28 @@ DimPlot(
 
 # Integrate with Harmony
 ```{r}
+intermedb <- "obj-hint.RDS"
+if(!file.exists(file.path(indir, intermedb))){
+  
+  # Integrate layers
+  obj.hint <- IntegrateLayers(
+    object = obj, method = HarmonyIntegration,
+    orig.reduction = "pca", new.reduction = "harmony",
+    verbose = FALSE
+  )
+  # initialized install of "harmony"
+  obj.hint
+  
+  obj.hint <- FindNeighbors(obj.hint, reduction = "harmony", dims = 1:30)
+  obj.hint <- FindClusters(obj.hint, resolution = 2, cluster.name = "harmony_clusters")
+  obj.hint <- RunUMAP(obj.hint, reduction = "harmony", dims = 1:30, reduction.name = "umap.harmony")
+  
+  saveRDS(obj.hint, file = file.path(outdir, intermedb))
+  
+}else{
+  obj.hint <- readRDS(file.path(indir, intermedb))
+}
 
-# Integrate layers
-obj.hint <- IntegrateLayers(
-  object = obj, method = HarmonyIntegration,
-  orig.reduction = "pca", new.reduction = "harmony",
-  verbose = FALSE
-)
-# initialized install of "harmony"
-obj.hint
-
-obj.hint <- FindNeighbors(obj.hint, reduction = "harmony", dims = 1:30)
-obj.hint <- FindClusters(obj.hint, resolution = 2, cluster.name = "harmony_clusters")
-obj.hint <- RunUMAP(obj.hint, reduction = "harmony", dims = 1:30, reduction.name = "umap.harmony")
 
 DimPlot(
   obj.hint,
@@ -243,6 +284,7 @@ DimPlot(
 )
 
 ```
+
 
 
 

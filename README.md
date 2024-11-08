@@ -11,7 +11,7 @@ Regulatory Tcells (Tregs) are a subset of CD4+ Tcells that overexpress the maste
 - Deriving novel biological conclusions from generated atlas
 
 ## Pipeline and results
-Fig.1.
+**Fig.1.**
 ![Alt Text](workflow.png)
 
 **1. Data input**
@@ -20,19 +20,23 @@ Single-cell HTAN level 4 data was accessed using synapseclient and downloaded to
 **2. Preprocessing, cell annotation, and clustering**
 Single-cell RNAseq data was recovered from HTAN as described above and processed using the pipeline elaborated in the [scrna_extract_tregs.ipynb](scrna_extract_tregs.ipynb) notebook. Briefly, the data was initially quality checked (Fig.2a.) prior to annotation with python-based, CellTypist, for automated cell typing according to references available mainly for human and mouse data. Then, the data is normalized and log transformed to account for 10,000 counts per cell which is used for the creation of UMAP plots (Fig.2b.). CellTypist curates models and ontologies for the annotation of the cells within different clusters. We applied this pipeline on X number of databases and confirmed that the plots were consistent with the original processing. We then selectively extracted the Tregs (Fig.2c.) from the different datasets and fed them into the integration pipeline for further downstream processing and comparisons across samples and cancer subtypes.
 
-Fig.2a.
+**Fig.2a.**
 ![Alt Text](qc.png)
 The data shows that the authros have already filtered for cells with mito frac>20% which is consistent with the original manuscript and we can infer from the distribution of th emolecule count that true single cells could be distinguished from empty droplets.
 
-Fig.2b.
+**Fig.2b.**
 ![Alt Text](umap.png)
 Clustering of cells from the same database reveals various distinct subpopulations of cell types, including Tregs.
 
-Fig.2c.
+**Fig.2c.**
 ![Alt Text](filter_for_treg.png)
 Majority voting can extract Tregs based on expression of CD4 and FOXP3.
 
 **3. Integration**
+After extracting the Tregs from our chosen datasets and exporting them as h5ad, the files were merged in Rstudio as described in the [integrate-h5ads.Rmd](integrate-h5ads.Rmd) notebook. Firstly, duplicate features were aggregated and metadata was added and merged in a seurat object. Then, we perfromed batch correction using CCA and Harmony integration. This allows us to visualize Treg populations from different datasets in UMAP format as shown in (Fig.3.)
+
+**Fig.3.**
+![Alt Text](umap)
 
 **4. Downstream analysis**
 

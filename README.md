@@ -49,17 +49,11 @@ In the future, we hope to automate the pipeline for CellTypist to analyze and an
 - We were finally limited by only being able to apply our pipeline on one dataset at a time which resulted in the analysis requiring more time than initially expected.
 
 ## Team
-Team lead: Benjamin Green, University of Hawaii
-
-Beata Malachowska, affilitaion
-
-Marissa Lee, affilitation
-
-Archana Balan, affilitation
-
-Yichun He, affilitation
-
-Abhirami Suresh, affilitaion
-
-Elie Abi Khalil, University of Illinois Chicago
+- Team lead: Benjamin Green, University of Hawaii
+- Beata Malachowska, affilitaion
+- Marissa Lee, affilitation
+- Archana Balan, affilitation
+- Yichun He, affilitation
+- Abhirami Suresh, affilitaion
+- Elie Abi Khalil, University of Illinois Chicago
 
